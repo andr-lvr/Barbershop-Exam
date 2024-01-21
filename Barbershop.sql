@@ -3,7 +3,6 @@
 -- Drop the existing BarbersDB if it exists
 USE master;
 GO
-
 IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BarberShopDB')
 BEGIN
     ALTER DATABASE BarberShopDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
@@ -24,9 +23,10 @@ CREATE TABLE Barbers (
     Gender NVARCHAR(10) NOT NULL,  
     ContactPhone NVARCHAR(20) NOT NULL,
     Email NVARCHAR(100) NOT NULL,
-    BirthDate DATE,
+    BirthDate DATE NOT NULL,
     HireDate DATE NOT NULL,
     Position NVARCHAR(50) NOT NULL,
+	-- ensures that the values in the Position column must be one of the specified options
     CONSTRAINT CK_Position CHECK (Position IN ('Chief Barber', 'Senior Barber', 'Junior Barber'))
 );
 GO
@@ -43,7 +43,7 @@ GO
 
 -- Create Client Table
 CREATE TABLE Clients (
-    ClientID INT PRIMARY KEY,
+    ClientID INT IDENTITY(1,1) PRIMARY KEY,
     FullName NVARCHAR(255) NOT NULL,
     ContactPhone NVARCHAR(20) NOT NULL,
     Email NVARCHAR(100) NOT NULL
@@ -53,7 +53,7 @@ GO
 
 -- Create BarberFeedback Table
 CREATE TABLE BarberFeedback (
-    FeedbackID INT PRIMARY KEY,
+    FeedbackID INT IDENTITY(1,1) PRIMARY KEY,
     BarberID INT NOT NULL,
     ClientID INT NOT NULL,
     Rating NVARCHAR(20) NOT NULL,
@@ -114,23 +114,23 @@ VALUES
 GO
 
 -- Insert into Clients Table
-INSERT INTO Clients (ClientID, FullName, ContactPhone, Email)
+INSERT INTO Clients (FullName, ContactPhone, Email)
 VALUES
-(1, 'Mary Johnson', '444-555-6666', 'mary.johnson@example.com'),
-(2, 'Tom Davis', '666-777-8888', 'tom.davis@example.com'),
-(3, 'Sara Miller', '999-888-7777', 'sara.miller@example.com'),
-(4, 'Alex Turner', '111-222-3333', 'alex.turner@example.com'),
-(5, 'Olivia Brown', '333-444-5555', 'olivia.brown@example.com');
+('Mary Johnson', '444-555-6666', 'mary.johnson@example.com'),
+('Tom Davis', '666-777-8888', 'tom.davis@example.com'),
+('Sara Miller', '999-888-7777', 'sara.miller@example.com'),
+('Alex Turner', '111-222-3333', 'alex.turner@example.com'),
+('Olivia Brown', '333-444-5555', 'olivia.brown@example.com');
 GO
 
 -- Insert into BarberFeedback Table
-INSERT INTO BarberFeedback (FeedbackID, BarberID, ClientID, Rating, Feedback)
+INSERT INTO BarberFeedback (BarberID, ClientID, Rating, Feedback)
 VALUES
-(1, 1, 1, 'Excellent', 'Great haircut, very satisfied!'),
-(2, 2, 3, 'Good', 'Nice shave but took a bit long.'),
-(3, 3, 2, 'Excellent', 'Awesome coloring job!'),
-(4, 4, 4, 'Average', 'Decent beard trim, could be better.'),
-(5, 5, 5, 'Good', 'Liked the manicure service.');
+(1, 1, 'Excellent', 'Great haircut, very satisfied!'),
+(2, 3, 'Good', 'Nice shave but took a bit long.'),
+(3, 2, 'Excellent', 'Awesome coloring job!'),
+(4, 4, 'Average', 'Decent beard trim, could be better.'),
+(5, 5, 'Good', 'Liked the manicure service.');
 GO
 
 -- Insert into Schedule Table
@@ -246,3 +246,37 @@ BEGIN
 
     RETURN @isAvailable;
 END;
+
+-- Example Queries and Calls to Functions and Procedures
+
+-- 1. Get All Barbers
+SELECT * FROM GetAllBarbers;
+
+-- 2. Get Barbers Providing a Specific Service
+SELECT * FROM GetBarbersByService('Haircut');
+
+-- 3. Get Barbers with More than X Years of Experience
+SELECT * FROM GetBarbersByExperience(3);
+
+-- 4. Delete Old Visits from Archive
+EXEC DeleteOldVisitsFromArchive;
+
+-- 5. Get Count of Senior and Junior Barbers
+EXEC GetSeniorJuniorBarberCount;
+
+-- 6. Get Regular Clients with at Least X Visits
+EXEC GetRegularClients 2;
+
+-- 7. Get Information about the Longest Service
+SELECT * FROM GetLongestService;
+
+-- 8. Get Schedule for a Specific Barber on a Given Day
+EXEC GetBarberSchedule @barberID = 1, @date = '2024-01-21';
+
+-- 9. Get Top 3 Barbers by Average Rating
+SELECT * FROM GetTopRatedBarbers;
+
+-- 10. Check if a Barber is Available at a Specific Date and Time
+DECLARE @isAvailable BIT;
+SET @isAvailable = dbo.IsBarberAvailable(@barberID = 1, @date = '2024-01-21', @timeSlot = '09:00 AM');
+SELECT @isAvailable AS IsAvailable;

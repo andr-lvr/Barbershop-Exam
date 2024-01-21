@@ -1,5 +1,3 @@
-
-
 -- Drop the existing BarbersDB if it exists
 USE master;
 GO
@@ -142,7 +140,6 @@ VALUES
     ('2024-01-21', '01:00 PM'),
     ('2024-01-21', '02:00 PM');
 GO
-
 -- Functionality Implementation
 
 -- 1. Return information about all barbers
@@ -247,36 +244,22 @@ BEGIN
     RETURN @isAvailable;
 END;
 
--- Example Queries and Calls to Functions and Procedures
+-- Show example work of functions
 
 -- 1. Get All Barbers
-SELECT * FROM GetAllBarbers;
+SELECT * FROM dbo.GetAllBarbers();
 
 -- 2. Get Barbers Providing a Specific Service
-SELECT * FROM GetBarbersByService('Haircut');
+SELECT * FROM dbo.GetBarbersByService('Haircut');
 
 -- 3. Get Barbers with More than X Years of Experience
-SELECT * FROM GetBarbersByExperience(3);
-
--- 4. Delete Old Visits from Archive
-EXEC DeleteOldVisitsFromArchive;
+SELECT * FROM dbo.GetBarbersByExperience(3);
 
 -- 5. Get Count of Senior and Junior Barbers
-EXEC GetSeniorJuniorBarberCount;
-
--- 6. Get Regular Clients with at Least X Visits
-EXEC GetRegularClients 2;
+EXEC dbo.GetSeniorJuniorBarberCount;
 
 -- 7. Get Information about the Longest Service
-SELECT * FROM GetLongestService;
+SELECT * FROM dbo.GetLongestService();
 
 -- 8. Get Schedule for a Specific Barber on a Given Day
-EXEC GetBarberSchedule @barberID = 1, @date = '2024-01-21';
-
--- 9. Get Top 3 Barbers by Average Rating
-SELECT * FROM GetTopRatedBarbers;
-
--- 10. Check if a Barber is Available at a Specific Date and Time
-DECLARE @isAvailable BIT;
-SET @isAvailable = dbo.IsBarberAvailable(@barberID = 1, @date = '2024-01-21', @timeSlot = '09:00 AM');
-SELECT @isAvailable AS IsAvailable;
+EXEC dbo.GetBarberSchedule @barberID = 1, @date = '2024-01-21';
